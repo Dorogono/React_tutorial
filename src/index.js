@@ -54,6 +54,7 @@ class Game extends React.Component {
       ],
       stepNumber: 0,
       xIsNext: true,
+      clickOrder: new Set(),
     };
   }
 
@@ -86,16 +87,35 @@ class Game extends React.Component {
     });
   }
 
+  getCoordinate(idx) {
+    let clickPoint = [];
+    if (idx < 3) clickPoint = [0, idx];
+    else if (idx < 6) clickPoint = [1, idx % 3];
+    else clickPoint = [2, idx % 3];
+
+    return clickPoint;
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
-      const desc = move ? `Go to move # ${move}` : "Go to game start";
+      step.squares.forEach((v, i) => {
+        if (v) this.state.clickOrder.add(i);
+      });
+      const order = Array.from(this.state.clickOrder);
+
+      const desc = move
+        ? `Go to move #${move} :
+          [${this.getCoordinate(order[move - 1])[0]}, ${
+            this.getCoordinate(order[move - 1])[1]
+          }]`
+        : "Go to game start";
 
       return (
-        <li key={move}>
+        <li key={move} className={move}>
           <button onClick={() => this.jumpTo(move)}>{desc}</button>
         </li>
       );
